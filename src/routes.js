@@ -12,6 +12,7 @@ export const routes = [
     handler: (req, res) => {
       const { title, description } = req.body;
 
+      // Validação simples para garantir integridade dos dados
       if (!title || !description) {
         return res.writeHead(400).end(
           JSON.stringify({ message: 'Title and description are required' })
@@ -19,7 +20,7 @@ export const routes = [
       }
 
       const task = {
-        id: randomUUID(),
+        id: randomUUID(), // Gera um ID único universal
         title,
         description,
         completed_at: null,
@@ -38,6 +39,7 @@ export const routes = [
     handler: (req, res) => {
       const { search } = req.query;
 
+      // Busca tarefas, aplicando filtro de busca se o parâmetro 'search' existir
       const tasks = database.select('tasks', search ? {
         title: search,
         description: search
@@ -47,7 +49,7 @@ export const routes = [
     }
   },
   {
-    method: 'PUT',
+    method: 'PUT', // Rota para atualização completa de uma tarefa
     path: buildRoutePath('/tasks/:id'),
     handler: (req, res) => {
       const { id } = req.params;
@@ -59,6 +61,7 @@ export const routes = [
         );
       }
 
+      // Verifica se a tarefa existe antes de tentar atualizar
       const [task] = database.select('tasks', null).filter(t => t.id === id);
 
       if (!task) {
@@ -92,7 +95,7 @@ export const routes = [
     }
   },
   {
-    method: 'PATCH',
+    method: 'PATCH', // PATCH é usado para atualizações parciais (neste caso, apenas o status)
     path: buildRoutePath('/tasks/:id/complete'),
     handler: (req, res) => {
       const { id } = req.params;
@@ -103,6 +106,7 @@ export const routes = [
         return res.writeHead(404).end(JSON.stringify({ message: 'Task not found' }));
       }
 
+      // Lógica de toggle: se está completada, remove a data; se não, adiciona a data atual
       const isCompleted = !!task.completed_at;
       const completed_at = isCompleted ? null : new Date();
 

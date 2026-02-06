@@ -2,21 +2,24 @@
 import fs from 'node:fs/promises';
 import { URL } from 'node:url';
 
+// Define o caminho do arquivo físico onde os dados serão salvos
 const databasePath = new URL('../db.json', import.meta.url);
 
 export class Database {
-  #database = {};
+  #database = {}; // Propriedade privada (#) para proteger o acesso direto aos dados
 
   constructor() {
+    // Ao iniciar, tenta ler o arquivo existente para carregar os dados em memória
     fs.readFile(databasePath, 'utf8')
       .then(data => {
         this.#database = JSON.parse(data);
       })
       .catch(() => {
-        this.#persist();
+        this.#persist(); // Se não existir, cria o arquivo vazio
       });
   }
 
+  // Método auxiliar para salvar os dados da memória no arquivo físico (Persistência)
   #persist() {
     fs.writeFile(databasePath, JSON.stringify(this.#database));
   }
@@ -24,6 +27,7 @@ export class Database {
   select(table, search) {
     let data = this.#database[table] ?? [];
 
+    // Lógica de filtro genérica para qualquer tabela
     if (search) {
       data = data.filter(row => {
         return Object.entries(search).some(([key, value]) => {
@@ -42,7 +46,7 @@ export class Database {
       this.#database[table] = [data];
     }
 
-    this.#persist();
+    this.#persist(); // Salva no arquivo sempre que insere um dado novo
     return data;
   }
 
